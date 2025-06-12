@@ -1,4 +1,4 @@
-name: Deploy Flask Services
+name: Selective Deploy Flask Services
 
 on:
   push:
@@ -8,7 +8,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v2
@@ -19,23 +20,17 @@ jobs:
         run: |
           gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
 
-      # Service 1
-      - name: Build and Push s-1
+      - name: Detect Changed Services
+        id: detect
         run: |
-          cd s-1
-          docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-1:latest .
-          docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-1:latest
+          echo "CHANGED_DIRS=$(git diff --name-only HEAD^ HEAD | grep '^s-' | cut -d/ -f1 | sort -u | tr '\n' ' ')" >> $GITHUB_ENV
 
-      # Service 2
-      - name: Build and Push s-2
+      - name: Build and Push Docker Images
         run: |
-          cd s-2
-          docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-2:latest .
-          docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-2:latest
-
-      # Service 3
-      - name: Build and Push s-3
-        run: |
-          cd s-3
-          docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-3:latest .
-          docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-3:latest
+          for dir in $CHANGED_DIRS; do
+            echo "🚀 Building and pushing: $dir"
+            cd $dir
+            docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/$dir:latest .
+            docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/$dir:latest
+            cd ..
+          done
