@@ -1,4 +1,4 @@
-name: Deploy All Flask Services
+name: Deploy Flask Services
 
 on:
   push:
@@ -8,30 +8,30 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout code
       - uses: actions/checkout@v4
 
-      # 2. GCP Auth (your working version)
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-      # 3. Build & Push ALL services sequentially
+      # Service 1
       - name: Build and Push s-1
-        working-directory: s-1
         run: |
+          cd s-1
           docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-1:latest .
           docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-1:latest
 
+      # Service 2
       - name: Build and Push s-2
-        working-directory: s-2
         run: |
+          cd s-2
           docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-2:latest .
           docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-2:latest
 
+      # Service 3
       - name: Build and Push s-3
-        working-directory: s-3
         run: |
+          cd s-3
           docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-3:latest .
           docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-3:latest
