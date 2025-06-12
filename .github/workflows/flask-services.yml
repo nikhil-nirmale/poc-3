@@ -1,47 +1,24 @@
-name: Simple Flask Services CI/CD
+name: Flask Services Deployment
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      # Checkout code
+      # 1. Checkout code
       - uses: actions/checkout@v4
 
-      # Setup Python
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      # 2. GCP Authentication (Your working version)
+      - name: Authenticate with GCP - POC
+        uses: google-github-actions/auth@v2
         with:
-          python-version: '3.10'
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-      # Authenticate with GCP (hardcoded project ID)
-      - name: Login to Google Artifact Registry
+      # 3. Build & Push Docker Image (Hardcoded values)
+      - name: Build and Push
         run: |
-          echo "${{ secrets.GCP_CREDENTIALS }}" > service-account.json
-          gcloud auth activate-service-account --key-file=service-account.json
-          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
-
-      # Build and push ALL services (no change detection)
-      - name: Build and Push s-1
-        working-directory: s-1
-        run: |
-          pip install flask
-          docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-1:latest .
-          docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-1:latest
-
-      - name: Build and Push s-2
-        working-directory: s-2
-        run: |
-          pip install flask
-          docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-2:latest .
-          docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-2:latest
-
-      - name: Build and Push s-3
-        working-directory: s-3
-        run: |
-          pip install flask
-          docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-3:latest .
-          docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-3:latest
+          docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/flask-app:latest .
+          docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/flask-app:latest
