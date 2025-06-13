@@ -9,26 +9,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repo with full commit history for git diff
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Required for HEAD^ to work
+          fetch-depth: 2
 
-      # Step 2: Authenticate with GCP using service account
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-      # Step 3: Detect which services have changed (e.g. s-1, s-2)
+      - name: Configure Docker to use GCP Artifact Registry
+        run: |
+          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
+
       - name: Detect changed service directories
         id: detect
         run: |
           echo "CHANGED_DIRS=$(git diff --name-only HEAD^ HEAD | grep '^s-' | cut -d/ -f1 | sort -u | tr '\n' ' ')" >> $GITHUB_ENV
 
-      # Step 4: Build and push Docker images for only changed services
-      - name: Build and push Docker images
+      - name: Build and push Docker images for changed services
         run: |
           for dir in $CHANGED_DIRS; do
             echo "🚀 Building and pushing: $dir"
