@@ -54,8 +54,8 @@ jobs:
           for dir in $CHANGED_DIRS; do
             echo "🚀 Building and pushing: $dir"
 
-            # 🆔 Use short Git commit SHA as a unique tag (first 7 characters)
-            TAG=$(echo $GITHUB_SHA | cut -c1-7)
+            # # 🆔 Use timestamp + short Git commit SHA for tag
+            TAG="$(date +%Y%m%d-%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)"
 
             # 🏷️ Compose the full image name (hardcoded registry, repo, and service name)
             IMAGE="europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/$dir"
