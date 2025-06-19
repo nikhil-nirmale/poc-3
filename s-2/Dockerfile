@@ -12,8 +12,12 @@ WORKDIR /app
 # Copy your Python files into the container
 COPY main.py .
 
-# Install Flask (add other dependencies if needed)
-RUN pip install --no-cache-dir Flask
+# ✅ 4. Install dependencies:
+# - Flask: your web app framework
+# - appdynamics: the Python agent for monitoring
+# You're installing the AppDynamics Python agent so it can monitor your app from inside the container.
+# When your app starts, it will initialize the agent and send metrics to the AppDynamics controller.
+RUN pip install --no-cache-dir Flask appdynamics    
 
 # Expose the port your app runs on
 EXPOSE 8080
