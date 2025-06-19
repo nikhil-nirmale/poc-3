@@ -11,16 +11,16 @@ from flask import Flask
 import os
 
 # Initialize AppDynamics agent before app starts
-appdynamics.agent.start({
-    'controller': 'hopper202506172151188.saas.appdynamics.com',
-    'port': 443,
-    'ssl': True,
-    'account': 'hopper202506172151188',
-    'accesskey': 'sg6s6tdflk8u',
-    'application': 'HelloApp',
-    'tier': 's-1',
-    'node': 'Node-s-1'
-})
+appdynamics.agent.init(
+    controller='hopper202506172151188.saas.appdynamics.com',
+    port=443,
+    ssl=True,
+    account='hopper202506172151188',
+    access_key='sg6s6tdflk8u',
+    application='HelloApp',
+    tier='s-1',
+    node='Node-s-1'
+)
 
 app = Flask(__name__)
 
