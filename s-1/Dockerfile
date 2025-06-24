@@ -2,10 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install dependencies + download agent
+# Install dependencies + download with auth
 RUN apt-get update && \
     apt-get install -y wget tar && \
     wget -O /tmp/appd-py-agent.tar.bz2 \
+    --user=hopper202506172151188 \
+    --password=sg6s6tdflk8u \
     "https://download.appdynamics.com/download/prox/download-file/python/23.7.0.3582/linux-x64" && \
     tar -xjf /tmp/appd-py-agent.tar.bz2 -C /opt/appdynamics && \
     rm /tmp/appd-py-agent.tar.bz2 && \
