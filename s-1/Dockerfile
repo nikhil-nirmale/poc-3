@@ -8,11 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download and extract AppDynamics agent using curl
-RUN curl -L -o appd-agent.tar.bz2 \
-  --header "Authorization: Bearer <YOUR_LONG_TOKEN>" \
-  "https://download.appdynamics.com/download/prox/download-file/python/25.6.0.7974/appdynamics-pythonagent-25.6.0.7974-linux-64bit.tar.bz2" && \
-  tar -xjf appd-agent.tar.bz2 && \
-  rm appd-agent.tar.bz2
+RUN curl -fL -H "Authorization: Bearer eyJraWQiOi..." \
+    "https://download.appdynamics.com/download/prox/download-file/python/25.6.0.7974/appdynamics-pythonagent-25.6.0.7974-linux-64bit.tar.bz2" \
+    -o appd-agent.tar.bz2 && \
+    tar -xjf appd-agent.tar.bz2 && \
+    test -f appdynamics-pythonagent-25.6.0.7974/appdynamics-run.py && \
+    rm appd-agent.tar.bz2
 
 # Copy application
 COPY main.py .
