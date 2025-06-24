@@ -1,8 +1,7 @@
 FROM python:3.11-slim
 
+# Install system dependencies + AppDynamics agent
 WORKDIR /app
-
-# Install dependencies + download official Python agent
 RUN apt-get update && \
     apt-get install -y wget tar && \
     wget -O /tmp/appd-py-agent.tar.bz2 \
@@ -11,10 +10,13 @@ RUN apt-get update && \
     rm /tmp/appd-py-agent.tar.bz2 && \
     apt-get clean
 
+# Copy app files
 COPY main.py .
+
+# Install Python dependencies
 RUN pip install Flask appdynamics
 
-# Set required environment variables
+# AppDynamics Configuration (using your credentials)
 ENV APPDYNAMICS_CONTROLLER_HOST_NAME="hopper202506172151188.saas.appdynamics.com"
 ENV APPDYNAMICS_CONTROLLER_PORT="443"
 ENV APPDYNAMICS_CONTROLLER_SSL_ENABLED="true"
