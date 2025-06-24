@@ -1,71 +1,55 @@
-# 🏷️ Name of the workflow as seen in the GitHub Actions UI
 name: Deploy Flask Services
 
-# 🟢 Trigger this workflow only when pushing to the `main` branch
 on:
   push:
     branches: [main]
 
 jobs:
   deploy:
-    # 🖥️ Runs on GitHub-hosted Ubuntu runner
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Step 1: Checkout the repo code to the runner
-      # 🔍 Needed to access Dockerfiles and changed files
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # ⏳ Keeps last 2 commits so we can detect file changes
+          fetch-depth: 2
 
-      # ✅ Step 2: Authenticate to Google Cloud using service account credentials
-      # 🔐 Uses a secret `GCP_CREDENTIALS` you already added in repo secrets
-      # 🎯 Required for pushing to Artifact Registry
+      # ▼ New verification step added here ▼
+      - name: Verify AppDynamics Download
+        run: |
+          echo "Testing AppDynamics download..."
+          wget -v -O /dev/null \
+          --user=hopper202506172151188 \
+          --password=sg6s6tdflk8u \
+          "https://download.appdynamics.com/download/prox/download-file/python/23.7.0.3582/linux-x64" || (echo "❌ Download failed with status $?"; exit 1)
+          echo "✅ Download successful"
+
+      # Step 2: Authenticate to Google Cloud
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-      # ✅ Step 3: Set up Docker to use GCP Artifact Registry
-      # 🛠️ This command allows `docker push` to work with your private GAR repo
+      # Step 3: Configure Docker
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
 
-      # ✅ Step 4: Detect which service directories have changed
-      # 📁 Assumes services are in folders like `s-1`, `s-2`, etc.
-      # 🔍 Uses `git diff` to find which service folders changed in this commit
+      # Step 4: Detect changed services
       - name: Detect changed services
         id: detect
         run: |
           echo "CHANGED_DIRS=$(git diff --name-only HEAD^ HEAD | grep '^s-' | cut -d/ -f1 | sort -u | tr '\n' ' ')" >> $GITHUB_ENV
-          
-          # 🔎 Breakdown:
-          # - `git diff --name-only HEAD^ HEAD` → list of changed files
-          # - `grep '^s-'` → only files inside s-1/, s-2/, etc.
-          # - `cut -d/ -f1` → get top-level folder name
-          # - `sort -u` + `tr` → unique list in space-separated format
-          # → Output: CHANGED_DIRS="s-1 s-3"
 
-      # ✅ Step 5: For each changed service, build and push its Docker image
+      # Step 5: Build and push images
       - name: Build and push images with Git SHA tag
         run: |
           for dir in $CHANGED_DIRS; do
             echo "🚀 Building and pushing: $dir"
-
-            # # 🆔 Use timestamp + short Git commit SHA for tag
             TAG="$(date +%Y%m%d-%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)"
-
-            # 🏷️ Compose the full image name (hardcoded registry, repo, and service name)
             IMAGE="europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/$dir"
-
-            # 🛠️ Build Docker image with two tags:
-            # - $TAG: uniquely identifies this build
-            # - latest: optional tag if you want to keep latest pointer
             docker build -t $IMAGE:$TAG -t $IMAGE:latest $dir
-
-            # 🚀 Push both tags to Google Artifact Registry
             docker push $IMAGE:$TAG
             docker push $IMAGE:latest
           done
