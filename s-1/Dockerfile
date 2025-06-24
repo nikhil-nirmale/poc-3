@@ -1,27 +1,28 @@
-# Use official Python base image
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy only requirements first if you have them (for layer caching)
-# If no requirements.txt, skip this part or install manually below
-# COPY requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies + download official Python agent
+RUN apt-get update && \
+    apt-get install -y wget tar && \
+    wget -O /tmp/appd-py-agent.tar.bz2 \
+    "https://download.appdynamics.com/download/prox/download-file/python/latest/linux-x64" && \
+    tar -xjf /tmp/appd-py-agent.tar.bz2 -C /opt/appdynamics && \
+    rm /tmp/appd-py-agent.tar.bz2 && \
+    apt-get clean
 
-# Copy your Python files into the container
 COPY main.py .
+RUN pip install Flask appdynamics
 
-# ✅ 4. Install dependencies:
-# - Flask: your web app framework
-# - appdynamics: the Python agent for monitoring
-# You're installing the AppDynamics Python agent so it can monitor your app from inside the container.
-# When your app starts, it will initialize the agent and send metrics to the AppDynamics controller.
-RUN pip install --no-cache-dir Flask appdynamics    
+# Set required environment variables
+ENV APPDYNAMICS_CONTROLLER_HOST_NAME="hopper202506172151188.saas.appdynamics.com"
+ENV APPDYNAMICS_CONTROLLER_PORT="443"
+ENV APPDYNAMICS_CONTROLLER_SSL_ENABLED="true"
+ENV APPDYNAMICS_AGENT_ACCOUNT_NAME="hopper202506172151188"
+ENV APPDYNAMICS_AGENT_ACCOUNT_ACCESS_KEY="sg6s6tdflk8u"
+ENV APPDYNAMICS_AGENT_APPLICATION_NAME="HelloApp"
+ENV APPDYNAMICS_AGENT_TIER_NAME="s-1"
+ENV APPDYNAMICS_AGENT_NODE_NAME="Node-s-1"
 
-
-# Expose the port your app runs on
 EXPOSE 8080
-
-# Start the Flask app
 CMD ["python", "main.py"]
