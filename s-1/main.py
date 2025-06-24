@@ -1,24 +1,10 @@
 from flask import Flask
-import appdynamics
-import os
-
-# Hardcoded AppDynamics config
-appdynamics.agent.init(
-    controller='hopper202506172151188.saas.appdynamics.com',
-    port=443,
-    ssl=True,
-    account='hopper202506172151188',
-    access_key='sg6s6tdflk8u',
-    application='HelloApp',
-    tier='s-1',
-    node='Node-s-1'
-)
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "✅ AppDynamics-Monitored App (Simple Setup)"
+    return "✅ AppDynamics Monitored App (using official Python Agent)"
 
 @app.route("/health")
 def health():
