@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "✅ AppDynamics Monitored App (using official Python Agent)"
+    return "✅ Flask App Running"
 
 @app.route("/health")
 def health():
