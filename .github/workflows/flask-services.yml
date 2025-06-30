@@ -28,13 +28,22 @@ jobs:
         run: |
           echo "CHANGED_DIRS=$(git diff --name-only HEAD^ HEAD | grep '^s-' | cut -d/ -f1 | sort -u | tr '\n' ' ')" >> $GITHUB_ENV
 
-      - name: Build and push images with Git SHA tag
+      - name: Build and push images
         run: |
-          set -e  # Exit on first failure
+          set -e  # Fail on any error
           for dir in $CHANGED_DIRS; do
-            echo "🚀 Building and pushing: $dir"
+            echo "🚀 Building and pushing service: $dir"
             cd $dir
-            docker build -t europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/$dir:latest .
-            docker push europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/$dir:latest
+
+            IMAGE="europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/$dir"
+            TAG="$(date +%Y%m%d-%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)"
+
+            echo "🔧 Building image: $IMAGE:$TAG and $IMAGE:latest"
+            docker build -t $IMAGE:$TAG -t $IMAGE:latest .
+
+            echo "📦 Pushing to Artifact Registry..."
+            docker push $IMAGE:$TAG
+            docker push $IMAGE:latest
+
             cd ..
           done
