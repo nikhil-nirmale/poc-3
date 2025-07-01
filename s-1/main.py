@@ -3,8 +3,8 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 
-# Connect to MongoDB (replace host/port if different)
-client = MongoClient("mongodb://mongo:27017/")
+# Changed the MongoDB connection string hostname from 'mongo' to 'mongo-container'
+client = MongoClient("mongodb://mongo-container:27017/")
 db = client.demo_db
 visitors = db.visitors
 
@@ -21,4 +21,3 @@ def health():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
-    
