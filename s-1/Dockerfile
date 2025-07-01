@@ -17,7 +17,7 @@ COPY main.py .
 # - appdynamics: the Python agent for monitoring
 # You're installing the AppDynamics Python agent so it can monitor your app from inside the container.
 # When your app starts, it will initialize the agent and send metrics to the AppDynamics controller.
-RUN pip install --no-cache-dir Flask appdynamics    
+RUN pip install --no-cache-dir Flask pymongo appdynamics    
 
 # Expose the port your app runs on
 EXPOSE 8080
