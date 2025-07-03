@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-app
+  labels:
+    app: main-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: main-app
+  template:
+    metadata:
+      labels:
+        app: main-app
+    spec:
+      containers:
+        - name: main-container
+          image: europe-west1-docker.pkg.dev/poc-setup-462605/poc-docker-repo/s-1:latest  # 🔁 Replace with your actual image name
+          ports:
+            - containerPort: 8080
