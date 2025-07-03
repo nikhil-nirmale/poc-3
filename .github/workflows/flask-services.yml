@@ -1,10 +1,10 @@
 name: Deploy Flask Services
 
-on:
+#on:
   push:
     branches: [main]
 
-jobs:
+#jobs:
   deploy:
     runs-on: ubuntu-latest
 
@@ -15,18 +15,18 @@ jobs:
           fetch-depth: 2
 
       - name: Authenticate with GCP
-        uses: google-github-actions/auth@v2
+        #uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          #credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       - name: Configure Docker for Artifact Registry
         run: |
-          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
+          #gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
 
       - name: Detect changed services
         id: detect
         run: |
-          echo "CHANGED_DIRS=$(git diff --name-only HEAD^ HEAD | grep '^s-' | cut -d/ -f1 | sort -u | tr '\n' ' ')" >> $GITHUB_ENV
+          #echo "CHANGED_DIRS=$(git diff --name-only HEAD^ HEAD | grep '^s-' | cut -d/ -f1 | sort -u | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Build and push images with Git SHA tag
         run: |
